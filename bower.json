@@ -1,0 +1,27 @@
+{
+  "name": "things-happened-util",
+  "version": "0.3.0",
+  "description": "client-side framework for ease access to things happened",
+  "keywords": [
+    "event-sourcing",
+    "big-data",
+    "things-happened"
+  ],
+  "authors": [
+    "Daniel Oltmanns"
+  ],
+  "license": "MIT",
+  "homepage": "http://things-happened.org",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "jasmine": "~2.0.4"
+  },
+  "appPath": "app"
+}
