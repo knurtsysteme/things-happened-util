@@ -3,7 +3,7 @@
 
 things-happened-util JavaScript Library v0.4.0
 
-build: Sun Sep 28 2014 18:49:05 GMT+0200 (CEST)
+build: Sun Sep 28 2014 19:24:39 GMT+0200 (CEST)
 
 MIT License
 

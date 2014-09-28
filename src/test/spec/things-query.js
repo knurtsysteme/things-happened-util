@@ -28,6 +28,10 @@ describe('things.query:', function() {
   it('it should support secrets', function() {
     expect(things.query.select('cars').setSecret('abc').url()).toBe(things.config.serviceurl + '/get/cars.json?criteria={"_secret":"abc"}');
   });
+  it('it should support projections', function() {
+    var options = {projection:{name:true}};
+    expect(things.query.select('cars', options).url()).toBe(things.config.serviceurl + '/get/cars.json?projection={"name":true}');
+  });
   describe('When initilizing a new query', function() {
     it('it should throw an error without a correct collection name given', function() {
       expect(function() {
