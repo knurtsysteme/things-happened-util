@@ -8,7 +8,7 @@
  *          being part of different trees
  */
 
-var ThingsForest = function(things) {
+things.forest = function(things) {
 
   var result = {};
 

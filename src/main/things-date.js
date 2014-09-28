@@ -11,7 +11,7 @@
  * http://tools.ietf.org/html/rfc2822#page-14
  */
 
-var ThingsDate = {};
+things.date = {};
 /**
  * return a js object date of key of thing.
  * 
@@ -20,7 +20,7 @@ var ThingsDate = {};
  * @param key
  *          (optional) the key to use (default: '_date')
  */
-ThingsDate.getDate = function(thing, key) {
+things.date.getDate = function(thing, key) {
   key = key || '_date';
   var datestr = thing[key];
   var year = datestr.length > 3 ? datestr.substr(0, 4) - 0 : 0;

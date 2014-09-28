@@ -3,7 +3,7 @@
 
 things-happened-util JavaScript Library v0.3.1
 
-build: Sun Sep 28 2014 11:58:07 GMT+0200 (CEST)
+build: Sun Sep 28 2014 12:57:16 GMT+0200 (CEST)
 
 MIT License
 
@@ -34,13 +34,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * global configuration. override it in your code before things-happened.js to
  * change configuration.
  */
-var ThingsConfig = ThingsConfig || {};
+var things = {};
+things.config = {};
 
-// use this database
-ThingsConfig.serviceurl = ThingsConfig.serviceurl || 'http://localhost:3000';
+// use things-happened as default
+things.config.serviceurl = things.config.serviceurl || 'http://things-happened.org';
 
 // use this as global secret for every post and get request made.
-ThingsConfig.secret = ThingsConfig.secret || false;
+things.config.secret = things.config.secret || false;
 
 
 
@@ -55,7 +56,7 @@ ThingsConfig.secret = ThingsConfig.secret || false;
  * http://tools.ietf.org/html/rfc2822#page-14
  */
 
-var ThingsDate = {};
+things.date = {};
 /**
  * return a js object date of key of thing.
  * 
@@ -64,7 +65,7 @@ var ThingsDate = {};
  * @param key
  *          (optional) the key to use (default: '_date')
  */
-ThingsDate.getDate = function(thing, key) {
+things.date.getDate = function(thing, key) {
   key = key || '_date';
   var datestr = thing[key];
   var year = datestr.length > 3 ? datestr.substr(0, 4) - 0 : 0;
@@ -86,7 +87,7 @@ ThingsDate.getDate = function(thing, key) {
  *          being part of different trees
  */
 
-var ThingsForest = function(things) {
+things.forest = function(things) {
 
   var result = {};
 
@@ -170,41 +171,43 @@ var ThingsForest = function(things) {
  * (e.g. the things-happened angular module).
  */
 
-var ThingsQuery = {};
-ThingsQuery._produce = function(things, options) {
+things.query = {};
+things.query._produce = function(cn, options) {
+  things.config.serviceurl = things.config.serviceurl.replace(/\/$/, '');
   var options = options || {};
+  options.serviceurl = options.serviceurl || things.config.serviceurl;
   options.action = options.action || 'get';
   options.criteria = options.criteria || {};
   // take care about the global secret
   if (options.criteria._secret == false) {
     delete criteria._secret;
-  } else if (ThingsConfig.secret && typeof options.criteria._secret == 'undefined') {
-    options.criteria._secret = ThingsConfig.secret;
+  } else if (things.config.secret && typeof options.criteria._secret == 'undefined') {
+    options.criteria._secret = things.config.secret;
   }
 
   var me = this;
 
   // default construct with "things" (/get/things.json)
-  things = things || 'things';
+  cn = cn || 'things';
 
-  // validate given things
-  if (typeof things != 'string' || !things.match(/^[a-z]+$/)) {
+  // validate given cn
+  if (typeof cn != 'string' || !cn.match(/^[a-z]+$/)) {
     // TODO meldung genauer muss string sein bzw. buchstaben von a-z (auf url
     // verweisen, wie es angular so schön macht)
     throw new Error('must have "things" (@see mongo\'s collection name)');
   }
 
-  this.thatHaveNoChildIn = function(things) {
-    return this.whose('_id').isNotIn(things, '_pid');
+  this.thatHaveNoChildIn = function(cn) {
+    return this.whose('_id').isNotIn(cn, '_pid');
   }
   this.thatAreRoot = function() {
     return this.whose('_pid').is(null);
   }
-  this.thatHaveAChildIn = function(things) {
-    return this.whose('_id').isIn(things, '_pid');
+  this.thatHaveAChildIn = function(cn) {
+    return this.whose('_id').isIn(cn, '_pid');
   }
-  this.inSameForestAs = function(things) {
-    return this.whose('_rid').isIn(things, '_rid');
+  this.inSameForestAs = function(cn) {
+    return this.whose('_rid').isIn(cn, '_rid');
   }
   this.inSameTreeAs = function(thing) {
     return this.whose('_rid').is(thing._rid);
@@ -223,14 +226,10 @@ ThingsQuery._produce = function(things, options) {
    * set the status ("happen {{movieRated}} ed") of query
    */
   this.that = function(happened) {
-    // validate given happened
-    if (typeof happened != 'string' || !happened.match(/^[a-z\-]+$/)) {
-      // TODO meldung genauer muss string sein bzw. buchstaben von a-z (auf
-      // url
-      // verweisen, wie es angular so schön macht)
-      throw new Error('must have "things" (@see mongo\'s collection name)');
-    } else {
+    if (things.query.validForInsertion(happened).happened()) {
       options.happened = happened;
+    } else {
+      throw new Error('must have "things" (@see mongo\'s collection name)');
     }
     return me;
   }
@@ -358,16 +357,16 @@ ThingsQuery._produce = function(things, options) {
     } else {
       criteria = '?criteria=' + criteria;
     }
-    return '/' + options.action + '/' + things + happened + '.json' + criteria;
+    return options.serviceurl + '/' + options.action + '/' + cn + happened + '.json' + criteria;
   }
 };
-ThingsQuery.select = function(things) {
-  return new ThingsQuery._produce(things, {
+things.query.select = function(cn) {
+  return new things.query._produce(cn, {
     action : 'get'
   });
 };
-ThingsQuery.count = function(things) {
-  return new ThingsQuery._produce(things, {
+things.query.count = function(cn) {
+  return new things.query._produce(cn, {
     action : 'count'
   });
 };
@@ -375,7 +374,7 @@ ThingsQuery.count = function(things) {
  * return the given thing without data in it but with needed data for an update
  * of the thing (only properties starting with an underscore).
  */
-ThingsQuery.getCopyForUpdate = function(thing) {
+things.query.getCopyForUpdate = function(thing) {
   var result = {};
   var keys = Object.keys(thing);
   var i = keys.length;
@@ -387,7 +386,7 @@ ThingsQuery.getCopyForUpdate = function(thing) {
   return result;
 };
 
-ThingsQuery.validForInsertion = function(subject) {
+things.query.validForInsertion = function(subject) {
   var result = {};
   result.things = function() {
     var disallowedThings = [ 'things', 'everything' ];
@@ -433,24 +432,26 @@ ThingsQuery.validForInsertion = function(subject) {
 /**
  * support for adding things query.
  * 
- * Validation: ThingsQuery.add({some:"thing"}).to('trees', 'cut').isValid();
+ * Validation: things.query.add({some:"thing"}).to('trees', 'cut').isValid();
  */
-ThingsQuery.add = function(subject) {
+things.query.add = function(subject, options) {
   var result = {};
-  result.to = function(things, happened) {
+  options = options || {};
+  options.serviceurl = options.serviceurl || things.config.serviceurl;
+  result.to = function(cn, happened) {
     var result = {};
     result.isValid = function() {
-      return ThingsQuery.validForInsertion(happened).happened() && ThingsQuery.validForInsertion(things).things() && ThingsQuery.validForInsertion(subject).json();
+      return things.query.validForInsertion(happened).happened() && things.query.validForInsertion(cn).things() && things.query.validForInsertion(subject).json();
     };
     result.url = function() {
-      return result.isValid() ? '/addto/' + things + '/' + happened + '.json' : false;
+      return result.isValid() ?  options.serviceurl + '/addto/' + cn + '/' + happened + '.json' : false;
     };
     result.getThing = function() {
       if (typeof subject == 'string') {
         subject = JSON.parse(subject);
       }
-      if (ThingsConfig.secret) {
-        subject._secret = ThingsConfig.secret;
+      if (things.config.secret) {
+        subject._secret = things.config.secret;
       }
       return result.isValid() ? subject : false;
     };

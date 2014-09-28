@@ -48,6 +48,6 @@ Just a small example query yet. See jasmine tests for more examples and visit ht
 
 ```js
 // get short movies having a title
-var query = ThingsQuery.select('movies').whose('title').exists().whose('length').isLowerThan(50);
+var query = things.query.select('movies').whose('title').exists().whose('length').isLowerThan(50);
 console.info('http://things-happened.org' + query.url());
 ```

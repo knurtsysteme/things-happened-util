@@ -9,41 +9,43 @@
  * (e.g. the things-happened angular module).
  */
 
-var ThingsQuery = {};
-ThingsQuery._produce = function(things, options) {
+things.query = {};
+things.query._produce = function(cn, options) {
+  things.config.serviceurl = things.config.serviceurl.replace(/\/$/, '');
   var options = options || {};
+  options.serviceurl = options.serviceurl || things.config.serviceurl;
   options.action = options.action || 'get';
   options.criteria = options.criteria || {};
   // take care about the global secret
   if (options.criteria._secret == false) {
     delete criteria._secret;
-  } else if (ThingsConfig.secret && typeof options.criteria._secret == 'undefined') {
-    options.criteria._secret = ThingsConfig.secret;
+  } else if (things.config.secret && typeof options.criteria._secret == 'undefined') {
+    options.criteria._secret = things.config.secret;
   }
 
   var me = this;
 
   // default construct with "things" (/get/things.json)
-  things = things || 'things';
+  cn = cn || 'things';
 
-  // validate given things
-  if (typeof things != 'string' || !things.match(/^[a-z]+$/)) {
+  // validate given cn
+  if (typeof cn != 'string' || !cn.match(/^[a-z]+$/)) {
     // TODO meldung genauer muss string sein bzw. buchstaben von a-z (auf url
     // verweisen, wie es angular so schön macht)
     throw new Error('must have "things" (@see mongo\'s collection name)');
   }
 
-  this.thatHaveNoChildIn = function(things) {
-    return this.whose('_id').isNotIn(things, '_pid');
+  this.thatHaveNoChildIn = function(cn) {
+    return this.whose('_id').isNotIn(cn, '_pid');
   }
   this.thatAreRoot = function() {
     return this.whose('_pid').is(null);
   }
-  this.thatHaveAChildIn = function(things) {
-    return this.whose('_id').isIn(things, '_pid');
+  this.thatHaveAChildIn = function(cn) {
+    return this.whose('_id').isIn(cn, '_pid');
   }
-  this.inSameForestAs = function(things) {
-    return this.whose('_rid').isIn(things, '_rid');
+  this.inSameForestAs = function(cn) {
+    return this.whose('_rid').isIn(cn, '_rid');
   }
   this.inSameTreeAs = function(thing) {
     return this.whose('_rid').is(thing._rid);
@@ -62,14 +64,10 @@ ThingsQuery._produce = function(things, options) {
    * set the status ("happen {{movieRated}} ed") of query
    */
   this.that = function(happened) {
-    // validate given happened
-    if (typeof happened != 'string' || !happened.match(/^[a-z\-]+$/)) {
-      // TODO meldung genauer muss string sein bzw. buchstaben von a-z (auf
-      // url
-      // verweisen, wie es angular so schön macht)
-      throw new Error('must have "things" (@see mongo\'s collection name)');
-    } else {
+    if (things.query.validForInsertion(happened).happened()) {
       options.happened = happened;
+    } else {
+      throw new Error('must have "things" (@see mongo\'s collection name)');
     }
     return me;
   }
@@ -197,16 +195,16 @@ ThingsQuery._produce = function(things, options) {
     } else {
       criteria = '?criteria=' + criteria;
     }
-    return '/' + options.action + '/' + things + happened + '.json' + criteria;
+    return options.serviceurl + '/' + options.action + '/' + cn + happened + '.json' + criteria;
   }
 };
-ThingsQuery.select = function(things) {
-  return new ThingsQuery._produce(things, {
+things.query.select = function(cn) {
+  return new things.query._produce(cn, {
     action : 'get'
   });
 };
-ThingsQuery.count = function(things) {
-  return new ThingsQuery._produce(things, {
+things.query.count = function(cn) {
+  return new things.query._produce(cn, {
     action : 'count'
   });
 };
@@ -214,7 +212,7 @@ ThingsQuery.count = function(things) {
  * return the given thing without data in it but with needed data for an update
  * of the thing (only properties starting with an underscore).
  */
-ThingsQuery.getCopyForUpdate = function(thing) {
+things.query.getCopyForUpdate = function(thing) {
   var result = {};
   var keys = Object.keys(thing);
   var i = keys.length;
@@ -226,7 +224,7 @@ ThingsQuery.getCopyForUpdate = function(thing) {
   return result;
 };
 
-ThingsQuery.validForInsertion = function(subject) {
+things.query.validForInsertion = function(subject) {
   var result = {};
   result.things = function() {
     var disallowedThings = [ 'things', 'everything' ];
@@ -272,24 +270,26 @@ ThingsQuery.validForInsertion = function(subject) {
 /**
  * support for adding things query.
  * 
- * Validation: ThingsQuery.add({some:"thing"}).to('trees', 'cut').isValid();
+ * Validation: things.query.add({some:"thing"}).to('trees', 'cut').isValid();
  */
-ThingsQuery.add = function(subject) {
+things.query.add = function(subject, options) {
   var result = {};
-  result.to = function(things, happened) {
+  options = options || {};
+  options.serviceurl = options.serviceurl || things.config.serviceurl;
+  result.to = function(cn, happened) {
     var result = {};
     result.isValid = function() {
-      return ThingsQuery.validForInsertion(happened).happened() && ThingsQuery.validForInsertion(things).things() && ThingsQuery.validForInsertion(subject).json();
+      return things.query.validForInsertion(happened).happened() && things.query.validForInsertion(cn).things() && things.query.validForInsertion(subject).json();
     };
     result.url = function() {
-      return result.isValid() ? '/addto/' + things + '/' + happened + '.json' : false;
+      return result.isValid() ?  options.serviceurl + '/addto/' + cn + '/' + happened + '.json' : false;
     };
     result.getThing = function() {
       if (typeof subject == 'string') {
         subject = JSON.parse(subject);
       }
-      if (ThingsConfig.secret) {
-        subject._secret = ThingsConfig.secret;
+      if (things.config.secret) {
+        subject._secret = things.config.secret;
       }
       return result.isValid() ? subject : false;
     };
