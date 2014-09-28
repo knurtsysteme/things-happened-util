@@ -1,6 +1,6 @@
 {
   "name": "things-happened-util",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "main": "./dist/things-happened-util.js",
   "description": "client-side framework for ease access to things happened",
   "keywords": [

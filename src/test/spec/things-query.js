@@ -29,8 +29,27 @@ describe('things.query:', function() {
     expect(things.query.select('cars').setSecret('abc').url()).toBe(things.config.serviceurl + '/get/cars.json?criteria={"_secret":"abc"}');
   });
   it('it should support projections', function() {
-    var options = {projection:{name:true}};
+    var options = {
+      projection : {
+        name : true
+      }
+    };
     expect(things.query.select('cars', options).url()).toBe(things.config.serviceurl + '/get/cars.json?projection={"name":true}');
+  });
+  it('should request NOT only things with that secret IF secret explicitly not requested', function() {
+    var s = things.config.secret;
+    things.config.secret = 'foo';
+    var options = {
+      criteria : {
+        _secret : false
+      }
+    };
+    expect(things.query.select('cars', options).url()).toBe(things.config.serviceurl + '/get/cars.json');
+    things.config.secret = s;
+  });
+  it('it should support happened to', function() {
+    var query = things.query.happened.to('cars');
+    expect(query.url()).toBe(things.config.serviceurl + '/get/happened/to/cars.json');
   });
   describe('When initilizing a new query', function() {
     it('it should throw an error without a correct collection name given', function() {
@@ -137,30 +156,44 @@ describe('things.query:', function() {
   });
   describe('Provide query to addto things', function() {
     it('should give the right url', function() {
-      var query = things.query.add({a:1}).to('as','tested');
+      var query = things.query.add({
+        a : 1
+      }).to('as', 'tested');
       expect(query.url()).toBe(things.config.serviceurl + '/addto/as/tested.json');
     });
     it('should give the right url if passive diathesis', function() {
-      var dog = {a:1};
+      var dog = {
+        a : 1
+      };
       var query = things.query.add(dog).to('dogs').being('killed');
       expect(query.url()).toBe(things.config.serviceurl + '/addto/dogs/killed.json');
     });
     it('should give the subject', function() {
-      var query = things.query.add({a:1}).to('as','tested');
-      expect(query.getThing()).toEqual({a:1});
+      var query = things.query.add({
+        a : 1
+      }).to('as', 'tested');
+      expect(query.getThing()).toEqual({
+        a : 1
+      });
     });
     it('should give the subject even if it is a string', function() {
-      var query = things.query.add('{"a":1}').to('as','tested');
-      expect(query.getThing()).toEqual({a:1});
+      var query = things.query.add('{"a":1}').to('as', 'tested');
+      expect(query.getThing()).toEqual({
+        a : 1
+      });
     });
     it('should return false as url on invalids', function() {
-      var query = things.query.add({a:1}).to('as bs cd','tested');
+      var query = things.query.add({
+        a : 1
+      }).to('as bs cd', 'tested');
       expect(query.url()).toBeFalsy();
     });
     it('should return false as url on invalids', function() {
-      var query = things.query.add({a:1});
+      var query = things.query.add({
+        a : 1
+      });
       expect(query.url).toBeUndefined();
-    });    
+    });
   });
   describe('Provide validation of things', function() {
     it('should return true on a valid parameters', function() {

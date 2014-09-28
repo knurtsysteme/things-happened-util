@@ -19,7 +19,7 @@ things._intern.GetRequest = function(cn, options) {
   options.projection = options.projection || {};
   // take care about the global secret
   if (options.criteria._secret == false) {
-    delete criteria._secret;
+    delete options.criteria._secret;
   } else if (things.config.secret && typeof options.criteria._secret == 'undefined') {
     options.criteria._secret = things.config.secret;
   }
@@ -63,12 +63,12 @@ things._intern.GetRequest = function(cn, options) {
   var that = function(diathesisActiveVoice) {
     return function(happened) {
       // TODO set diathesis to criteria on specific mode
-    if (things.query.validForInsertion(happened).happened()) {
-      options.happened = happened;
-    } else {
-      throw new Error('must have "things" (@see mongo\'s collection name)');
-    }
-    return me;
+      if (things.query.validForInsertion(happened).happened()) {
+        options.happened = happened;
+      } else {
+        throw new Error('must have "things" (@see mongo\'s collection name)');
+      }
+      return me;
     };
   };
   /**
@@ -212,7 +212,7 @@ things._intern.GetRequest = function(cn, options) {
       urlquery = '?criteria=' + criteria;
     }
     if (projection != '{}') {
-      urlquery += urlquery == '' ? '?' : '&'; 
+      urlquery += urlquery == '' ? '?' : '&';
       urlquery += 'projection=' + projection;
     }
     return options.serviceurl + '/' + options.action + '/' + cn + happened + '.json' + urlquery;
@@ -227,6 +227,13 @@ things.query.count = function(cn, options) {
   options = options || {};
   options.action = 'count';
   return new things._intern.GetRequest(cn, options);
+};
+things.query.happened = {
+  to : function(cn, options) {
+    options = options || {};
+    options.action = 'get/happened/to';
+    return new things._intern.GetRequest(cn, options);
+  }
 };
 /**
  * return the given thing without data in it but with needed data for an update
@@ -305,7 +312,7 @@ things.query.add = function(subject, options) {
           return things.query.validForInsertion(happened).happened() && things.query.validForInsertion(cn).things() && things.query.validForInsertion(subject).json();
         };
         result.url = function() {
-          return result.isValid() ?  options.serviceurl + '/addto/' + cn + '/' + happened + '.json' : false;
+          return result.isValid() ? options.serviceurl + '/addto/' + cn + '/' + happened + '.json' : false;
         };
         result.getThing = function() {
           if (typeof subject == 'string') {
@@ -319,7 +326,7 @@ things.query.add = function(subject, options) {
         return result;
       }
     };
-    if(happened) {
+    if (happened) {
       return that(true)(happened);
     } else {
       return {
