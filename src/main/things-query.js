@@ -219,3 +219,58 @@ ThingsQuery.getCopyForUpdate = function(thing) {
   }
   return result;
 };
+
+ThingsQuery.validForInsertion = function(subject) {
+    var result = {};
+    result.things = function() {
+      return subject.match(/^[a-z]+$/);
+    };
+    result.happened = function() {
+      return subject.match(/^[a-z]+$/);
+    };
+    result.json = function() {
+      var result = true;
+      try {
+        // convert to jsonstr
+        var jsonstr = JSON.stringify(subject);
+        // check, if it is a single object
+        result = !!jsonstr.match(/^\{.+\}$/);
+        // check, if there are more attributes then allowed
+        var keys = [];
+        if(result) {
+          keys = Object.keys(subject);
+          result = keys.length <= 20;
+        }
+        // check if there is another object as attribute
+        if(result) {
+          var i = keys.length;
+          while(i--) {
+            if(typeof subject[keys[i]] == 'object' && JSON.stringify(subject[keys[i]]).match(/^\{/)) {
+              result = false;
+              break;
+            } 
+          }
+        }
+      } catch (e) {
+        result = false;
+      }
+      return result;
+    };
+    return result;
+};
+/**
+ * support for adding things query.
+ * 
+ * Validation: ThingsQuery.add({some:"thing"}).to('trees', 'cut').isValid();
+ */
+ThingsQuery.add = function(subject) {
+  var result = {};
+  result.to = function(things, happened) {
+    var result = {};
+    result.isValid = function() {
+      return ThingsQuery.validForInsertion(happened).happened() && ThingsQuery.validForInsertion(things).things() && ThingsQuery.validForInsertion(subject).json();
+    };
+    return result;
+  }
+  return result;
+}

@@ -131,4 +131,105 @@ describe('ThingsQuery:', function() {
       });
     });
   });
+  describe('Provide validation of things', function() {
+    it('should return true on a valid parameters', function() {
+      var subject = {
+        name : 'peter'
+      };
+      var things = 'cats';
+      var happened = 'died';
+      expect(ThingsQuery.add(subject).to(things, happened).isValid()).toBeTruthy();
+    });
+    it('should return true on a valid parameters, subject has array', function() {
+      var subject = {
+        name : 'peter',
+        b : [ 1, 2, 3, 4 ]
+      };
+      var things = 'cats';
+      var happened = 'died';
+      expect(ThingsQuery.add(subject).to(things, happened).isValid()).toBeTruthy();
+    });
+    it('should return false on invalid things', function() {
+      var subject = {
+        name : 'peter'
+      };
+      var things = 'cats is not valid';
+      var happened = 'died';
+      expect(ThingsQuery.add(subject).to(things, happened).isValid()).toBeFalsy();
+      expect(ThingsQuery.validForInsertion(things).things()).toBeFalsy();
+    });
+    it('should return false on invalid happened', function() {
+      var subject = {
+        name : 'peter'
+      };
+      var things = 'cats';
+      var happened = 'died fast';
+      expect(ThingsQuery.add(subject).to(things, happened).isValid()).toBeFalsy();
+      expect(ThingsQuery.validForInsertion(happened).happened()).toBeFalsy();
+    });
+    it('should return false on array as subject', function() {
+      var subject = [ {
+        name : 'peter'
+      } ];
+      var things = 'cats';
+      var happened = 'died';
+      expect(ThingsQuery.add(subject).to(things, happened).isValid()).toBeFalsy();
+      expect(ThingsQuery.validForInsertion(subject).json()).toBeFalsy();
+    });
+    it('should return false on plain object', function() {
+      var subject = {};
+      var things = 'cats';
+      var happened = 'died';
+      expect(ThingsQuery.add(subject).to(things, happened).isValid()).toBeFalsy();
+      expect(ThingsQuery.validForInsertion(subject).json()).toBeFalsy();
+    });
+    it('should return false on 2 dimensional object', function() {
+      var subject = {
+        name : "peter",
+        wife : {
+          name : "petra"
+        }
+      };
+      var things = 'cats';
+      var happened = 'died';
+      expect(ThingsQuery.add(subject).to(things, happened).isValid()).toBeFalsy();
+      expect(ThingsQuery.validForInsertion(subject).json()).toBeFalsy();
+    });
+    it('should return false on more then 20 attributes', function() {
+      var subject = {
+        a : 1,
+        b : 2,
+        c : 3,
+        d : 4,
+        e : 5,
+        f : 6,
+        g : 7,
+        h : 8,
+        i : 9,
+        j : 10,
+        k : 11,
+        l : 12,
+        m : 13,
+        n : 14,
+        o : 15,
+        p : 16,
+        q : 17,
+        r : 18,
+        s : 19,
+        t : 20,
+        u : 21
+      };
+      var things = 'cats';
+      var happened = 'died';
+      expect(ThingsQuery.add(subject).to(things, happened).isValid()).toBeFalsy();
+      expect(ThingsQuery.validForInsertion(subject).json()).toBeFalsy();
+    });
+    it('should return false on string subject', function() {
+      var subject = 'hello!';
+      var things = 'cats';
+      var happened = 'died';
+      expect(ThingsQuery.add(subject).to(things, happened).isValid()).toBeFalsy();
+      expect(ThingsQuery.validForInsertion(subject).json()).toBeFalsy();
+    });
+  });
 });
