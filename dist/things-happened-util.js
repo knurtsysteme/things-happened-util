@@ -1,9 +1,9 @@
-/*! things-happened-util v0.3.1 | (c) 2013-2014 KNURT Systeme | MIT License */
+/*! things-happened-util v0.4.0 | (c) 2013-2014 KNURT Systeme | MIT License */
 /* Copyright (c) 2013-2014 KNURT Systeme
 
-things-happened-util JavaScript Library v0.3.1
+things-happened-util JavaScript Library v0.4.0
 
-build: Sun Sep 28 2014 12:57:16 GMT+0200 (CEST)
+build: Sun Sep 28 2014 18:49:05 GMT+0200 (CEST)
 
 MIT License
 
@@ -35,6 +35,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * change configuration.
  */
 var things = {};
+/**
+ * only for private usage internal things
+ */
+things._intern = {};
+
+/**
+ * configuration object
+ */
 things.config = {};
 
 // use things-happened as default
@@ -172,7 +180,7 @@ things.forest = function(things) {
  */
 
 things.query = {};
-things.query._produce = function(cn, options) {
+things._intern.GetRequest = function(cn, options) {
   things.config.serviceurl = things.config.serviceurl.replace(/\/$/, '');
   var options = options || {};
   options.serviceurl = options.serviceurl || things.config.serviceurl;
@@ -221,18 +229,33 @@ things.query._produce = function(cn, options) {
     }
     return this.inSameTreeAs(thing).whose('_branch').isIn(branchNodes);
   }
-
-  /**
-   * set the status ("happen {{movieRated}} ed") of query
-   */
-  this.that = function(happened) {
+  var that = function(diathesisActiveVoice) {
+    return function(happened) {
+      // TODO set diathesis to criteria on specific mode
     if (things.query.validForInsertion(happened).happened()) {
       options.happened = happened;
     } else {
       throw new Error('must have "things" (@see mongo\'s collection name)');
     }
     return me;
-  }
+    };
+  };
+  /**
+   * set the status ("happened") of query
+   */
+  this.that = that(true);
+  /**
+   * alias for that with active voice
+   */
+  this.have = that(true);
+  /**
+   * alias for that with passive voide
+   */
+  this.haveBeen = that(false);
+  /**
+   * alias for that with passive voice
+   */
+  this.got = that(false);
 
   this.hasCriterion = function(criterion) {
     return typeof options.criteria[criterion] != 'undefined';
@@ -361,12 +384,12 @@ things.query._produce = function(cn, options) {
   }
 };
 things.query.select = function(cn) {
-  return new things.query._produce(cn, {
+  return new things._intern.GetRequest(cn, {
     action : 'get'
   });
 };
 things.query.count = function(cn) {
-  return new things.query._produce(cn, {
+  return new things._intern.GetRequest(cn, {
     action : 'count'
   });
 };
@@ -439,23 +462,44 @@ things.query.add = function(subject, options) {
   options = options || {};
   options.serviceurl = options.serviceurl || things.config.serviceurl;
   result.to = function(cn, happened) {
-    var result = {};
-    result.isValid = function() {
-      return things.query.validForInsertion(happened).happened() && things.query.validForInsertion(cn).things() && things.query.validForInsertion(subject).json();
-    };
-    result.url = function() {
-      return result.isValid() ?  options.serviceurl + '/addto/' + cn + '/' + happened + '.json' : false;
-    };
-    result.getThing = function() {
-      if (typeof subject == 'string') {
-        subject = JSON.parse(subject);
+    var that = function(diathesisActiveVoice) {
+      // TODO subject._diathesis = diathesisActiveVoice ? 'active' : 'passive';
+      return function(happened) {
+        var result = {};
+        result.isValid = function() {
+          return things.query.validForInsertion(happened).happened() && things.query.validForInsertion(cn).things() && things.query.validForInsertion(subject).json();
+        };
+        result.url = function() {
+          return result.isValid() ?  options.serviceurl + '/addto/' + cn + '/' + happened + '.json' : false;
+        };
+        result.getThing = function() {
+          if (typeof subject == 'string') {
+            subject = JSON.parse(subject);
+          }
+          if (things.config.secret) {
+            subject._secret = things.config.secret;
+          }
+          return result.isValid() ? subject : false;
+        };
+        return result;
       }
-      if (things.config.secret) {
-        subject._secret = things.config.secret;
-      }
-      return result.isValid() ? subject : false;
     };
-    return result;
+    if(happened) {
+      return that(true)(happened);
+    } else {
+      return {
+        that : that(true),
+        being : that(false),
+        getting : that(false)
+      }
+    }
   }
   return result;
 }
+
+
+/**
+ * you may want to use utils server-sided?
+ * here's the line for node.js
+ */
+if(typeof(exports) !== 'undefined' && typeof(exports.things) === 'undefined') exports.things = things;

@@ -18,7 +18,7 @@ var process = function(src, filepath) {
 
 module.exports = {
   thingsHappenedUtil : {
-    src : [ 'src/main/config.js', 'src/main/things-*.js' ],
+    src : [ 'src/main/config.js', 'src/main/things-*.js', 'src/main/node.js' ],
     dest : 'dist/' + global.pkg.name + '.js'
   },
   options : {

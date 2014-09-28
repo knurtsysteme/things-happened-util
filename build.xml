@@ -8,6 +8,12 @@
 			<arg line="jasmine" />
 		</exec>
 	</target>
+  <target name="test all vows" description="run all unit tests">
+    <apply executable="${basedir}/node_modules/vows/bin/vows">
+      <arg value="--spec"/>
+      <fileset dir="./src/test/vows" includes="*.js" />
+    </apply>
+  </target>
 	<target name="test: server start" description="start karma server">
 		<exec executable="node_modules/karma/bin/karma" failonerror="false">
 			<arg line="start src/test/karma.conf.js" />
