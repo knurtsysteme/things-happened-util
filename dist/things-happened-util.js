@@ -1,9 +1,9 @@
-/*! things-happened-util v0.4.0 | (c) 2013-2014 KNURT Systeme | MIT License */
+/*! things-happened-util v0.4.1 | (c) 2013-2014 KNURT Systeme | MIT License */
 /* Copyright (c) 2013-2014 KNURT Systeme
 
-things-happened-util JavaScript Library v0.4.0
+things-happened-util JavaScript Library v0.4.1
 
-build: Sun Sep 28 2014 19:24:39 GMT+0200 (CEST)
+build: Sun Sep 28 2014 19:40:38 GMT+0200 (CEST)
 
 MIT License
 
@@ -186,6 +186,7 @@ things._intern.GetRequest = function(cn, options) {
   options.serviceurl = options.serviceurl || things.config.serviceurl;
   options.action = options.action || 'get';
   options.criteria = options.criteria || {};
+  options.projection = options.projection || {};
   // take care about the global secret
   if (options.criteria._secret == false) {
     delete criteria._secret;
@@ -375,23 +376,27 @@ things._intern.GetRequest = function(cn, options) {
 
     // url for criteria
     var criteria = JSON.stringify(options.criteria);
-    if (criteria == '{}') {
-      criteria = '';
-    } else {
-      criteria = '?criteria=' + criteria;
+    var projection = JSON.stringify(options.projection);
+    var urlquery = '';
+    if (criteria != '{}') {
+      urlquery = '?criteria=' + criteria;
     }
-    return options.serviceurl + '/' + options.action + '/' + cn + happened + '.json' + criteria;
+    if (projection != '{}') {
+      urlquery += urlquery == '' ? '?' : '&'; 
+      urlquery += 'projection=' + projection;
+    }
+    return options.serviceurl + '/' + options.action + '/' + cn + happened + '.json' + urlquery;
   }
 };
-things.query.select = function(cn) {
-  return new things._intern.GetRequest(cn, {
-    action : 'get'
-  });
+things.query.select = function(cn, options) {
+  options = options || {};
+  options.action = 'get';
+  return new things._intern.GetRequest(cn, options);
 };
-things.query.count = function(cn) {
-  return new things._intern.GetRequest(cn, {
-    action : 'count'
-  });
+things.query.count = function(cn, options) {
+  options = options || {};
+  options.action = 'count';
+  return new things._intern.GetRequest(cn, options);
 };
 /**
  * return the given thing without data in it but with needed data for an update
