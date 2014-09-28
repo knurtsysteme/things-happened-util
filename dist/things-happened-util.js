@@ -3,7 +3,7 @@
 
 things-happened-util JavaScript Library v0.3.1
 
-build: Sun Sep 28 2014 11:26:23 GMT+0200 (CEST)
+build: Sun Sep 28 2014 11:58:07 GMT+0200 (CEST)
 
 MIT License
 
@@ -28,6 +28,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 'use strict';
+
+
+/**
+ * global configuration. override it in your code before things-happened.js to
+ * change configuration.
+ */
+var ThingsConfig = ThingsConfig || {};
+
+// use this database
+ThingsConfig.serviceurl = ThingsConfig.serviceurl || 'http://localhost:3000';
+
+// use this as global secret for every post and get request made.
+ThingsConfig.secret = ThingsConfig.secret || false;
+
 
 
 /**
@@ -161,6 +175,12 @@ ThingsQuery._produce = function(things, options) {
   var options = options || {};
   options.action = options.action || 'get';
   options.criteria = options.criteria || {};
+  // take care about the global secret
+  if (options.criteria._secret == false) {
+    delete criteria._secret;
+  } else if (ThingsConfig.secret && typeof options.criteria._secret == 'undefined') {
+    options.criteria._secret = ThingsConfig.secret;
+  }
 
   var me = this;
 
@@ -368,47 +388,47 @@ ThingsQuery.getCopyForUpdate = function(thing) {
 };
 
 ThingsQuery.validForInsertion = function(subject) {
-    var result = {};
-    result.things = function() {
-      var disallowedThings = ['things', 'everything'];
-      return !!subject.match(/^[a-z]+$/) && disallowedThings.indexOf(subject) < 0;
-    };
-    result.happened = function() {
-      return !!subject.match(/^[a-z]+$/);
-    };
-    result.json = function(isString) {
-      isString = typeof isString == 'undefined' ? false : !!isString;
-      var result = true;
-      try {
-        // convert to jsonstr
-        if(isString) {
-          subject = JSON.parse(subject);
-        }
-        var jsonstr = JSON.stringify(subject);
-        // check, if it is a single object
-        result = !!jsonstr.match(/^\{.+\}$/);
-        // check, if there are more attributes then allowed
-        var keys = [];
-        if(result) {
-          keys = Object.keys(subject);
-          result = keys.length <= 20;
-        }
-        // check if there is another object as attribute
-        if(result) {
-          var i = keys.length;
-          while(i--) {
-            if(typeof subject[keys[i]] == 'object' && JSON.stringify(subject[keys[i]]).match(/^\{/)) {
-              result = false;
-              break;
-            } 
+  var result = {};
+  result.things = function() {
+    var disallowedThings = [ 'things', 'everything' ];
+    return !!subject.match(/^[a-z]+$/) && disallowedThings.indexOf(subject) < 0;
+  };
+  result.happened = function() {
+    return !!subject.match(/^[a-z]+$/);
+  };
+  result.json = function(isString) {
+    isString = typeof isString == 'undefined' ? false : !!isString;
+    var result = true;
+    try {
+      // convert to jsonstr
+      if (isString) {
+        subject = JSON.parse(subject);
+      }
+      var jsonstr = JSON.stringify(subject);
+      // check, if it is a single object
+      result = !!jsonstr.match(/^\{.+\}$/);
+      // check, if there are more attributes then allowed
+      var keys = [];
+      if (result) {
+        keys = Object.keys(subject);
+        result = keys.length <= 20;
+      }
+      // check if there is another object as attribute
+      if (result) {
+        var i = keys.length;
+        while (i--) {
+          if (typeof subject[keys[i]] == 'object' && JSON.stringify(subject[keys[i]]).match(/^\{/)) {
+            result = false;
+            break;
           }
         }
-      } catch (e) {
-        result = false;
       }
-      return result;
-    };
+    } catch (e) {
+      result = false;
+    }
     return result;
+  };
+  return result;
 };
 /**
  * support for adding things query.
@@ -426,8 +446,11 @@ ThingsQuery.add = function(subject) {
       return result.isValid() ? '/addto/' + things + '/' + happened + '.json' : false;
     };
     result.getThing = function() {
-      if(typeof subject == 'string') {
+      if (typeof subject == 'string') {
         subject = JSON.parse(subject);
+      }
+      if (ThingsConfig.secret) {
+        subject._secret = ThingsConfig.secret;
       }
       return result.isValid() ? subject : false;
     };
