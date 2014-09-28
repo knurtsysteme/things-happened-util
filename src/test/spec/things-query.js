@@ -136,6 +136,11 @@ describe('things.query:', function() {
       var query = things.query.add({a:1}).to('as','tested');
       expect(query.url()).toBe(things.config.serviceurl + '/addto/as/tested.json');
     });
+    it('should give the right url if passive diathesis', function() {
+      var dog = {a:1};
+      var query = things.query.add(dog).to('dogs').being('killed');
+      expect(query.url()).toBe(things.config.serviceurl + '/addto/dogs/killed.json');
+    });
     it('should give the subject', function() {
       var query = things.query.add({a:1}).to('as','tested');
       expect(query.getThing()).toEqual({a:1});
