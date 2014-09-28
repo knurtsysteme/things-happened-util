@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="things-happened-util" basedir=".">
-	<target name="build" description="shortcut to grunt">
+	<target name="grunt" description="shortcut to grunt">
 		<exec executable="grunt" />
+	</target>
+	<target name="grunt jasmine" description="shortcut to grunt">
+		<exec executable="grunt">
+			<arg line="jasmine" />
+		</exec>
 	</target>
 	<target name="test: server start" description="start karma server">
 		<exec executable="node_modules/karma/bin/karma" failonerror="false">
@@ -9,8 +14,8 @@
 		</exec>
 	</target>
 	<target name="test: open in chrome" description="open test page in google chrome (new window)">
-    <exec executable="google-chrome">
-      <arg line="-url http://localhost:8080/base/src/test/_SpecRunner.html" />
-    </exec>
+		<exec executable="google-chrome">
+			<arg line="-url http://localhost:8080/base/src/test/_SpecRunner.html" />
+		</exec>
 	</target>
 </project>
