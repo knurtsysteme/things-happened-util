@@ -59,18 +59,26 @@ things._intern.GetRequest = function(cn, options) {
     }
     return this.inSameTreeAs(thing).whose('_branch').isIn(branchNodes);
   }
-
-  /**
-   * set the status ("happen {{movieRated}} ed") of query
-   */
-  this.that = function(happened) {
+  var that = function(happened) {
     if (things.query.validForInsertion(happened).happened()) {
       options.happened = happened;
     } else {
       throw new Error('must have "things" (@see mongo\'s collection name)');
     }
     return me;
-  }
+  };
+  /**
+   * set the status ("happen {{movieRated}} ed") of query
+   */
+  this.that = that;
+  /**
+   * alias for that
+   */
+  this.have = that;
+  /**
+   * alias for that
+   */
+  this.haveBeen = that;
 
   this.hasCriterion = function(criterion) {
     return typeof options.criteria[criterion] != 'undefined';

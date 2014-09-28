@@ -39,7 +39,7 @@ describe('things.query:', function() {
     });
     it('it should throw error on invalid happened', function() {
       expect(function() {
-        things.query.select('cars').that('rumblödeln')
+        things.query.select('cars').have('rumblödeln')
       }).toThrow(new Error('must have "things" (@see mongo\'s collection name)'));
     });
   });
@@ -114,7 +114,7 @@ describe('things.query:', function() {
       expect(query.url()).toBe(assertUrl);
     });
     it('get all cars crashed', function() {
-      expect(things.query.select('cars').that('crashed').url()).toBe(things.config.serviceurl + '/get/cars/crashed.json');
+      expect(things.query.select('cars').haveBeen('crashed').url()).toBe(things.config.serviceurl + '/get/cars/crashed.json');
     });
     it('count all cars crashed', function() {
       expect(things.query.count('cars').that('crashed').url()).toBe(things.config.serviceurl + '/count/cars/crashed.json');
