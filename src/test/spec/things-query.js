@@ -131,6 +131,28 @@ describe('ThingsQuery:', function() {
       });
     });
   });
+  describe('Provide query to addto things', function() {
+    it('should give the right url', function() {
+      var query = ThingsQuery.add({a:1}).to('as','tested');
+      expect(query.url()).toBe('/addto/as/tested.json');
+    });
+    it('should give the subject', function() {
+      var query = ThingsQuery.add({a:1}).to('as','tested');
+      expect(query.getThing()).toEqual({a:1});
+    });
+    it('should give the subject even if it is a string', function() {
+      var query = ThingsQuery.add('{"a":1}').to('as','tested');
+      expect(query.getThing()).toEqual({a:1});
+    });
+    it('should return false as url on invalids', function() {
+      var query = ThingsQuery.add({a:1}).to('as bs cd','tested');
+      expect(query.url()).toBeFalsy();
+    });
+    it('should return false as url on invalids', function() {
+      var query = ThingsQuery.add({a:1});
+      expect(query.url).toBeUndefined();
+    });    
+  });
   describe('Provide validation of things', function() {
     it('should return true on a valid parameters', function() {
       var subject = {
@@ -230,6 +252,14 @@ describe('ThingsQuery:', function() {
       var happened = 'died';
       expect(ThingsQuery.add(subject).to(things, happened).isValid()).toBeFalsy();
       expect(ThingsQuery.validForInsertion(subject).json()).toBeFalsy();
+    });
+    it('should return false on disallowed _cns', function() {
+      expect(ThingsQuery.validForInsertion('things').things()).toBeFalsy();
+      expect(ThingsQuery.validForInsertion('everything').things()).toBeFalsy();
+    });
+    it('should return true on valid json string subject if explicitly said', function() {
+      var subject = '{"name":"peter"}';
+      expect(ThingsQuery.validForInsertion(subject).json(true)).toBeTruthy();
     });
   });
 });

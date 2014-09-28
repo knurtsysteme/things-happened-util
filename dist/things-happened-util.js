@@ -1,9 +1,9 @@
-/*! things-happened-util v0.3.0 | (c) 2013-2014 KNURT Systeme | MIT License */
+/*! things-happened-util v0.3.1 | (c) 2013-2014 KNURT Systeme | MIT License */
 /* Copyright (c) 2013-2014 KNURT Systeme
 
-things-happened-util JavaScript Library v0.3.0
+things-happened-util JavaScript Library v0.3.1
 
-build: Sat Sep 20 2014 15:00:53 GMT+0200 (CEST)
+build: Sun Sep 28 2014 11:26:23 GMT+0200 (CEST)
 
 MIT License
 
@@ -366,3 +366,72 @@ ThingsQuery.getCopyForUpdate = function(thing) {
   }
   return result;
 };
+
+ThingsQuery.validForInsertion = function(subject) {
+    var result = {};
+    result.things = function() {
+      var disallowedThings = ['things', 'everything'];
+      return !!subject.match(/^[a-z]+$/) && disallowedThings.indexOf(subject) < 0;
+    };
+    result.happened = function() {
+      return !!subject.match(/^[a-z]+$/);
+    };
+    result.json = function(isString) {
+      isString = typeof isString == 'undefined' ? false : !!isString;
+      var result = true;
+      try {
+        // convert to jsonstr
+        if(isString) {
+          subject = JSON.parse(subject);
+        }
+        var jsonstr = JSON.stringify(subject);
+        // check, if it is a single object
+        result = !!jsonstr.match(/^\{.+\}$/);
+        // check, if there are more attributes then allowed
+        var keys = [];
+        if(result) {
+          keys = Object.keys(subject);
+          result = keys.length <= 20;
+        }
+        // check if there is another object as attribute
+        if(result) {
+          var i = keys.length;
+          while(i--) {
+            if(typeof subject[keys[i]] == 'object' && JSON.stringify(subject[keys[i]]).match(/^\{/)) {
+              result = false;
+              break;
+            } 
+          }
+        }
+      } catch (e) {
+        result = false;
+      }
+      return result;
+    };
+    return result;
+};
+/**
+ * support for adding things query.
+ * 
+ * Validation: ThingsQuery.add({some:"thing"}).to('trees', 'cut').isValid();
+ */
+ThingsQuery.add = function(subject) {
+  var result = {};
+  result.to = function(things, happened) {
+    var result = {};
+    result.isValid = function() {
+      return ThingsQuery.validForInsertion(happened).happened() && ThingsQuery.validForInsertion(things).things() && ThingsQuery.validForInsertion(subject).json();
+    };
+    result.url = function() {
+      return result.isValid() ? '/addto/' + things + '/' + happened + '.json' : false;
+    };
+    result.getThing = function() {
+      if(typeof subject == 'string') {
+        subject = JSON.parse(subject);
+      }
+      return result.isValid() ? subject : false;
+    };
+    return result;
+  }
+  return result;
+}

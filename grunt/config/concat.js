@@ -19,7 +19,7 @@ var process = function(src, filepath) {
 module.exports = {
   thingsHappenedUtil : {
     src : [ 'src/main/*.js' ],
-    dest : 'dist/' + global.pkg.name + '.' + global.pkg.version + '.js'
+    dest : 'dist/' + global.pkg.name + '.js'
   },
   options : {
     banner : banner(),

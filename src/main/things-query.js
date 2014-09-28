@@ -223,15 +223,20 @@ ThingsQuery.getCopyForUpdate = function(thing) {
 ThingsQuery.validForInsertion = function(subject) {
     var result = {};
     result.things = function() {
-      return subject.match(/^[a-z]+$/);
+      var disallowedThings = ['things', 'everything'];
+      return !!subject.match(/^[a-z]+$/) && disallowedThings.indexOf(subject) < 0;
     };
     result.happened = function() {
-      return subject.match(/^[a-z]+$/);
+      return !!subject.match(/^[a-z]+$/);
     };
-    result.json = function() {
+    result.json = function(isString) {
+      isString = typeof isString == 'undefined' ? false : !!isString;
       var result = true;
       try {
         // convert to jsonstr
+        if(isString) {
+          subject = JSON.parse(subject);
+        }
         var jsonstr = JSON.stringify(subject);
         // check, if it is a single object
         result = !!jsonstr.match(/^\{.+\}$/);
@@ -269,6 +274,15 @@ ThingsQuery.add = function(subject) {
     var result = {};
     result.isValid = function() {
       return ThingsQuery.validForInsertion(happened).happened() && ThingsQuery.validForInsertion(things).things() && ThingsQuery.validForInsertion(subject).json();
+    };
+    result.url = function() {
+      return result.isValid() ? '/addto/' + things + '/' + happened + '.json' : false;
+    };
+    result.getThing = function() {
+      if(typeof subject == 'string') {
+        subject = JSON.parse(subject);
+      }
+      return result.isValid() ? subject : false;
     };
     return result;
   }

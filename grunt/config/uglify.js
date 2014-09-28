@@ -1,7 +1,7 @@
 var grunt = require('grunt');
 
 var files = {};
-files['dist/' + global.pkg.name + '.' + global.pkg.version + '.min.js'] = [ 'dist/' + global.pkg.name + '.' + global.pkg.version + '.js' ];
+files['dist/' + global.pkg.name + '.min.js'] = [ 'dist/' + global.pkg.name + '.js' ];
 
 module.exports = {
   options : {
