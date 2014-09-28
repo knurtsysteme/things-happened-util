@@ -5,6 +5,14 @@
  * change configuration.
  */
 var things = {};
+/**
+ * only for private usage internal things
+ */
+things._intern = {};
+
+/**
+ * configuration object
+ */
 things.config = {};
 
 // use things-happened as default

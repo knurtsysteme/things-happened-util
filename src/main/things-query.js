@@ -10,7 +10,7 @@
  */
 
 things.query = {};
-things.query._produce = function(cn, options) {
+things._intern.GetRequest = function(cn, options) {
   things.config.serviceurl = things.config.serviceurl.replace(/\/$/, '');
   var options = options || {};
   options.serviceurl = options.serviceurl || things.config.serviceurl;
@@ -199,12 +199,12 @@ things.query._produce = function(cn, options) {
   }
 };
 things.query.select = function(cn) {
-  return new things.query._produce(cn, {
+  return new things._intern.GetRequest(cn, {
     action : 'get'
   });
 };
 things.query.count = function(cn) {
-  return new things.query._produce(cn, {
+  return new things._intern.GetRequest(cn, {
     action : 'count'
   });
 };
