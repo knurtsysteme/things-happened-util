@@ -35,5 +35,17 @@ describe('things.date:', function() {
       }, 'explodedOn');
       expect(date + '').toMatch(/^Wed Sep 17 2014 00:00:00/);
     });
+    it('should return null on invalid keys', function() {
+      // issue #1
+      var date = things.date.getDate({
+        bar : '20140917'
+      }, 'foo');
+      expect(date).toBeNull();
+    });
+    it('should return null on invalid things', function() {
+      // issue #1
+      var date = things.date.getDate(null, 'foo');
+      expect(date).toBeNull();
+    });
   });
 });

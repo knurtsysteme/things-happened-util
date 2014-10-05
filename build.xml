@@ -8,6 +8,11 @@
 			<arg line="jasmine" />
 		</exec>
 	</target>
+  <target name="github: open in chrome" description="open project page in google chrome (new window)">
+    <exec executable="google-chrome">
+      <arg line="-url http://github.com/knurtsysteme/things-happened-util" />
+    </exec>
+  </target>
   <target name="test all vows" description="run all unit tests">
     <apply executable="${basedir}/node_modules/vows/bin/vows">
       <arg value="--spec"/>
