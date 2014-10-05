@@ -1,9 +1,9 @@
-/*! things-happened-util v0.4.2 | (c) 2013-2014 KNURT Systeme | MIT License */
+/*! things-happened-util v0.4.3 | (c) 2013-2014 KNURT Systeme | MIT License */
 /* Copyright (c) 2013-2014 KNURT Systeme
 
-things-happened-util JavaScript Library v0.4.2
+things-happened-util JavaScript Library v0.4.3
 
-build: Sun Sep 28 2014 20:09:55 GMT+0200 (CEST)
+build: Sun Oct 05 2014 07:59:42 GMT+0200 (CEST)
 
 MIT License
 
@@ -74,15 +74,19 @@ things.date = {};
  *          (optional) the key to use (default: '_date')
  */
 things.date.getDate = function(thing, key) {
+  var result = null;
   key = key || '_date';
-  var datestr = thing[key];
-  var year = datestr.length > 3 ? datestr.substr(0, 4) - 0 : 0;
-  var month = datestr.length > 5 ? datestr.substr(4, 2) - 1 : 0;
-  var day = datestr.length > 7 ? datestr.substr(6, 2) - 0 : 0;
-  var hour = datestr.length > 9 ? datestr.substr(8, 2) - 0 : 0;
-  var minute = datestr.length > 11 ? datestr.substr(10, 2) - 0 : 0;
-  var second = datestr.length > 13 ? datestr.substr(12, 2) - 0 : 0;
-  return new Date(year, month, day, hour, minute, second);
+  if (thing && thing[key]) {
+    var datestr = thing[key];
+    var year = datestr.length > 3 ? datestr.substr(0, 4) - 0 : 0;
+    var month = datestr.length > 5 ? datestr.substr(4, 2) - 1 : 0;
+    var day = datestr.length > 7 ? datestr.substr(6, 2) - 0 : 0;
+    var hour = datestr.length > 9 ? datestr.substr(8, 2) - 0 : 0;
+    var minute = datestr.length > 11 ? datestr.substr(10, 2) - 0 : 0;
+    var second = datestr.length > 13 ? datestr.substr(12, 2) - 0 : 0;
+    result = new Date(year, month, day, hour, minute, second);
+  }
+  return result;
 }
 
 

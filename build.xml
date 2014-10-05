@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="things-happened-util" basedir=".">
 	<target name="grunt" description="shortcut to grunt">
-		<exec executable="grunt" />
+		<exec executable="grunt" failonerror="true" />
 	</target>
 	<target name="grunt jasmine" description="shortcut to grunt">
-		<exec executable="grunt">
+		<exec executable="grunt" failonerror="true">
 			<arg line="jasmine" />
 		</exec>
 	</target>
