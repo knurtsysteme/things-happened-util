@@ -295,6 +295,13 @@ describe('things.query:', function() {
       expect(things.query.add(subject).to(cn, happened).isValid()).toBeFalsy();
       expect(things.query.validForInsertion(subject).json()).toBeFalsy();
     });
+    it('should return true on string subject after validForInsertion', function() {
+      var subject = {foo:'bar'};
+      var cn = 'cats';
+      var happened = 'died';
+      expect(things.query.add(subject).to(cn, happened).isValid()).toBeTruthy();
+      expect(things.query.validForInsertion(subject).json()).toBeTruthy();
+    });
     it('should return false on disallowed _cns', function() {
       expect(things.query.validForInsertion('things').things()).toBeFalsy();
       expect(things.query.validForInsertion('everything').things()).toBeFalsy();

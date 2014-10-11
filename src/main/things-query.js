@@ -136,7 +136,10 @@ things._intern.GetRequest = function(cn, options) {
 
   this.whose = function(criterion) {
     var possibilities = {};
-    var getComparsionQueryOptions = function(values, key, operator) {
+    options.criteria[criterion] = options.criteria[criterion] || {};
+    
+    // return the values of something is or not in something else's key values
+    var getComparsionQueryValues = function(values, key, operator) {
       if (key) {
         var tmpvalues = [];
         if (options.criteria[criterion] && options.criteria[criterion][operator]) {
@@ -150,41 +153,37 @@ things._intern.GetRequest = function(cn, options) {
         }
         values = tmpvalues;
       }
-      var result = {};
-      result[operator] = values;
-      return result
+      return values;
     }
 
     // @see http://docs.mongodb.org/manual/reference/operator/query/in/
     possibilities.isIn = function(values, key) {
-      options.criteria[criterion] = getComparsionQueryOptions(values, key, '$in');
+      options.criteria[criterion]['$in'] = getComparsionQueryValues(values, key, '$in');
       return me;
     }
-    possibilities.isGreaterThan = function(values, key) {
-      options.criteria[criterion] = getComparsionQueryOptions(values, key, '$gt');
+    possibilities.isGreaterThan = function(value) {
+      options.criteria[criterion]['$gt'] = value;
       return me;
     }
-    possibilities.isLowerThan = function(values, key) {
-      options.criteria[criterion] = getComparsionQueryOptions(values, key, '$lt');
+    possibilities.isLowerThan = function(value) {
+      options.criteria[criterion]['$lt'] = value;
       return me;
     }
-    possibilities.isGreaterOrEqualThan = function(values, key) {
-      options.criteria[criterion] = getComparsionQueryOptions(values, key, '$gte');
+    possibilities.isGreaterOrEqualThan = function(value) {
+      options.criteria[criterion]['$gte'] = value;
       return me;
     }
-    possibilities.isLowerOrEqualThan = function(values, key) {
-      options.criteria[criterion] = getComparsionQueryOptions(values, key, '$lte');
+    possibilities.isLowerOrEqualThan = function(value) {
+      options.criteria[criterion]['$lte'] = value;
       return me;
     }
     possibilities.exists = function() {
-      options.criteria[criterion] = {
-        $exists : true
-      };
+      options.criteria[criterion]["$exists"] = true;
       return me;
     }
     // @see http://docs.mongodb.org/manual/reference/operator/query/nin/
     possibilities.isNotIn = function(values, key) {
-      options.criteria[criterion] = getComparsionQueryOptions(values, key, '$nin');
+      options.criteria[criterion]['$nin'] = getComparsionQueryValues(values, key, '$nin');
       return me;
     }
     possibilities.is = function(value) {
